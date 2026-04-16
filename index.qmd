@@ -186,7 +186,7 @@ Join the two datasets
 
 #function to split, since they'll all have same formats
 split_names = function(df, tune_name){
-  separate_wider_delim(
+  df |> separate_wider_delim(
     {{ tune_name }},
     delim = ".", 
     names = c("tune_name","krn","content","filetype"),
