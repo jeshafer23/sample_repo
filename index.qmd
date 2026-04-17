@@ -1,23 +1,41 @@
 ---
 title: "Dissonance in Contra Dance Tunes"
 author: "Jennifer England"
-format: html
+format: 
+  dashboard:
+    theme: yeti
 embed-resources: true
-editor: visual
 ---
 
 ```{r}
 #| echo: false
 #| output: false
+#| message: false
 # functions needed to run
 library(tidyverse)
 
 ```
 
-Data for the solfege pitches which are dissonant
+
+# Introduction
+::: {.card}
+Contra dance is a "cousin" of English Country Dance and square dance, and is a popular form of social dance in America, Canada, and parts of Europe. Contra is a "called" dance, meaning that a person in the role of the "caller" prompts each piece of the choreography in time with the music. It is also a social dance, where dancers pair up with different partners for each dance and interact with many other dancers in the course of a given dance.
+
+Contra dance choreographies have a fairly strict structure, which assumes there are a total of 4 sections of equal length. The first 2 sections are the same (or nearly the same), and the last 2 sectiosn are also the same (or nearly the same). For ease of reference, musicians, callers, and dancers usually refer to these as "A" and "B" sections. So, the four sections of the dance are usually A, A, B, B (or A, A1, B, B1 if there are slight variations in the repetition of each of the main sections).
+
+Because of this fairly strict structure, I'm curious about the musical structure of the tunes that go along with these choreographies. This project is part of a larger study I'm working on that examines 934 tunes (drawn from *The Portland Collection*), a well-known tune book that includes both traditional and modern tunes. The dataset used in this project was previously created by using a symbolic music notation system (Humdrum) to encode the dances, and then pull out and analyze various musical information about them.
+
+For this specific project, I'm focusing on the melody of the tunes and looking at the differences between how A vs. B sections treat musical dissonance. (Dissonance just means that the melody part doesn't "fit" with the underlying harmony.) The data presented here first summarizes the melodies as a whole in terms of what scale degrees are present, then examines how often each scale degree is used to create a dissonance; this information is looked at first for all A sections as a whole, then all B sections as a whole, and then finally a pairwise comparison to see what differences exist for the A and B usages within each tune.
+:::
+
+# Complete scale degree data
+
+# Summary of "dissonance" data
+
+
+## Row {height = 50%}
 
 ```{r}
-
 #since NA values truly do represent a non-occurrence of an event (all of these are events being counted, I'm going to replace all of the NA values with 0)
 
 #function to fill in zeroes
@@ -88,7 +106,108 @@ solf_dissB_summary <- pivot_longer(
   )
 
 ggplot(solf_dissA_summary, aes(x = solfege, y = avg_diss)) +
-  geom_col()
+  geom_col() + 
+  labs(title = "Average dissonance by scale degree, A sections") +
+  xlab("Solfege") +
+  ylab("Mean") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(solf_dissB_summary, aes(x = solfege, y = avg_diss)) +
+  geom_col() + 
+  labs(title = "Average dissonance by scale degree, B sections") +
+  xlab("Solfege") +
+  ylab("Mean")
+  
+```
+
+
+
+# Comparison of A vs. B sections
+
+# Discussion
+
+```{r}
+## dissonance data
+
+#since NA values truly do represent a non-occurrence of an event (all of these are events being counted, I'm going to replace all of the NA values with 0)
+
+#function to fill in zeroes
+fill_zeroes = function(vec){
+  replace_na({{ vec }}, 0)
+}
+
+## handle all of the dissonance data first
+
+#read in data
+solf_dissA=read_csv("A_solf_diss.txt",show_col_types=FALSE)
+solf_dissB=read_csv("B_solf_diss.txt",show_col_types=FALSE)
+
+
+#fill all data that is numeric, since all are numeric except for the tune titles
+solf_dissA_zeroes <- solf_dissA |> mutate(
+    across(where(is.numeric),fill_zeroes)
+    )
+solf_dissB_zeroes <- solf_dissB |> mutate(
+    across(where(is.numeric),fill_zeroes)
+    )
+
+
+#collapse columns by summing 
+solf_dissA_cleaned <- solf_dissA_zeroes |> 
+  mutate(mi_e = me + mi) |> 
+  mutate(fa_i = fa + fi) |> 
+  mutate(la_e = la + le) |> 
+  mutate(te_i = te + ti) |> 
+  select (Tune_name,do, re, mi_e, fa_i, so, la_e, te_i, Other)
+
+#an alternative:
+solf_dissA_cleaned <- solf_dissA_zeroes |> 
+  mutate(
+    mi_e = me + mi,
+    fa_i = fa + fi,
+    la_e = la + le,
+    te_i = te + ti
+  ) |> 
+  select (Tune_name, do, re, mi_e, fa_i, so, la_e, te_i, Other)
+
+solf_dissB_cleaned <- solf_dissB_zeroes |> 
+  mutate(mi_e = me + mi) |> 
+  mutate(fa_i = fa + fi) |> 
+  mutate(la_e = la + le) |> 
+  mutate(te_i = te + ti) |> 
+  select (Tune_name,do, re, mi_e, fa_i, so, la_e, te_i, Other)
+
+#pivot longer, calculate average amount of dissonance on each scale degree
+solf_dissA_summary <- pivot_longer(
+  solf_dissA_cleaned,
+  cols=c("do","re","mi_e","fa_i","so","la_e","te_i","Other"),
+  names_to = "solfege",
+  values_to = "count"
+  ) |> 
+  group_by(solfege) |> 
+  summarize(
+    avg_diss = mean(count)
+  )
+
+solf_dissB_summary <- pivot_longer(
+  solf_dissB_cleaned,
+  cols=c("do","re","mi_e","fa_i","so","la_e","te_i","Other"),
+  names_to = "solfege",
+  values_to = "count"
+  ) |> 
+  group_by(solfege) |> 
+  summarize(
+    avg_diss = mean(count)
+  )
+
+```
+
+
+```{r}
+
+
 
 
 
@@ -179,9 +298,12 @@ SD_B_summary <- pivot_longer(
 
 ```
 
-Join the two datasets
+
 
 ```{r}
+
+#joining for comparison data
+
 #split the names of each, so I can pair them by the tune name (ignoring the rest of the filename, since it just explains the type of info in the original file)
 
 #function to split, since they'll all have same formats
@@ -304,3 +426,4 @@ all_joined <- diss_diff |>
 
 
 ```
+

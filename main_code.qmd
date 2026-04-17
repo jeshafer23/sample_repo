@@ -186,7 +186,7 @@ Join the two datasets
 
 #function to split, since they'll all have same formats
 split_names = function(df, tune_name){
-  separate_wider_delim(
+  df |> separate_wider_delim(
     {{ tune_name }},
     delim = ".", 
     names = c("tune_name","krn","content","filetype"),
@@ -194,41 +194,12 @@ split_names = function(df, tune_name){
   )
 }
 
-#split_names(solf_dissA_cleaned,Tune_name)
 
-solf_dissA_join <- solf_dissA_cleaned |> 
-  separate_wider_delim(
-    Tune_name,
-    delim = ".", 
-    names = c("tune_name","krn","content","filetype"),
-    too_many = "merge"
-  )
+solf_dissA_join <- split_names(solf_dissA_cleaned,Tune_name)
+solf_dissB_join <- split_names(solf_dissB_cleaned,Tune_name)
+SD_A_join <- split_names(SD_A_cleaned,Tune_name)
+SD_B_join <- split_names(SD_B_cleaned,Tune_name)
 
-solf_dissB_join <- solf_dissB_cleaned |> 
-  separate_wider_delim(
-    Tune_name,
-    delim = ".", 
-    names = c("tune_name","krn","content","filetype"),
-    too_many = "merge"
-  )
-
-
-SD_A_join <- SD_A_cleaned |> 
-  separate_wider_delim(
-    Tune_name,
-    delim = ".", 
-    names = c("tune_name","krn","content","filetype"),
-    too_many = "merge"
-  )
-
-
-SD_B_join <- SD_B_cleaned |> 
-  separate_wider_delim(
-    Tune_name,
-    delim = ".", 
-    names = c("tune_name","krn","content","filetype"),
-    too_many = "merge"
-  )
 
 SD_diff <- SD_A_join |> 
   inner_join(SD_B_join, by = "tune_name", suffix = c("A","B")) |> 
