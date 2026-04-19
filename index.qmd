@@ -23,9 +23,34 @@ Contra dance is a "cousin" of English Country Dance and square dance, and is a p
 
 Contra dance choreographies have a fairly strict structure, which assumes there are a total of 4 sections of equal length. The first 2 sections are the same (or nearly the same), and the last 2 sectiosn are also the same (or nearly the same). For ease of reference, musicians, callers, and dancers usually refer to these as "A" and "B" sections. So, the four sections of the dance are usually A, A, B, B (or A, A1, B, B1 if there are slight variations in the repetition of each of the main sections).
 
-Because of this fairly strict structure, I'm curious about the musical structure of the tunes that go along with these choreographies. This project is part of a larger study I'm working on that examines 934 tunes (drawn from *The Portland Collection*), a well-known tune book that includes both traditional and modern tunes. The dataset used in this project was previously created by using a symbolic music notation system (Humdrum) to encode the dances, and then pull out and analyze various musical information about them.
+Because of this fairly strict structure, I'm curious about the musical structure of the tunes that go along with these choreographies. This project is part of a larger study I'm working on that examines 934 tunes (drawn from *The Portland Collection*, a well-known tune book that includes both traditional and modern tunes). The dataset used in this project was previously created by using a symbolic music notation system (Humdrum) to encode the dances, and then pull out and analyze various musical information about them.
 
-For this specific project, I'm focusing on the melody of the tunes and looking at the differences between how A vs. B sections treat musical dissonance. (Dissonance just means that the melody part doesn't "fit" with the underlying harmony.) The data presented here first summarizes the melodies as a whole in terms of what scale degrees are present, then examines how often each scale degree is used to create a dissonance; this information is looked at first for all A sections as a whole, then all B sections as a whole, and then finally a pairwise comparison to see what differences exist for the A and B usages within each tune.
+For this specific project, I'm focusing on the melody of the tunes and looking at the differences between how A vs. B sections treat musical dissonance. When we think about musical dissonance we are usually thinking about melody notes (the main part of the tune) and how they relate to the "back-up" parts (the accompaniment).
+
+This study will use scale-degree numbers to refer to individual pitches within the various tunes. When we think of musical scales, we often simply number the consecutive pitches by a given point of reference, based on the starting point of the scale. The numbers will run from 1 to 7 and then start over, as shown below:
+
+![](dissonance_score_example_0001.png)
+
+
+We can then build chords off of each one of these notes, by stacking a total of 3 pitches, always in an every-other-pitch configuration, as shown below. If we start on note #1, we'll use pitches 1-3-5; if we start on note #2, we'll use pitches 2-4-6.
+
+![](dissonance_score_example_chords_0002.png)
+
+
+
+Finally, when we look at a "real" piece of music (such as the opening to the tune "Eighth of January"), we have a melody on the top and chords underneath. We can then look at the numbers and determine which notes don't "fit" with the chords. The figure below highlights the notes that don't fit by marking them in red.
+
+![](dissonance_score_example_combined_0002.png)
+
+Occasionally this is made more complicated by alterations to some of the notes, so that multiple versions of a particular numbers could be present. In the example below, two different forms of scale degrees 3, 5, and 7 are included. Since they still represent the same distance from the reference note, and would tend to be viewed identically in terms of their function, the presentation of data here will generally collapse all different classes of a given scale degree into a single class (in other words, all possible forms of "3" will be just labelled as a "3.")
+
+![](dissonance_score_example_altered_tones_0002.png)
+
+
+
+In order to look at how these tunes use dissonance, the data presented here first summarizes the melodies as a whole in terms of what scale degrees are present, and then examines how often each scale degree is used to create a dissonance. Taking this approach allows us to view how "special" the various dissonances are--for instance, if scale degree 5 shows up frequently but is rarely used as a dissonance, this is different musical information than if scale degree 5 is rare but is used as a dissonance the majority of the time.
+
+The information about all scale degrees and then the dissonant scale degrees is examined first for all A sections as a whole, then all B sections as a whole, and then finally a pairwise comparison to see what differences exist for the A and B usages within each tune.
 :::
 
 # Complete scale degree data
@@ -118,7 +143,8 @@ ggplot(solf_dissB_summary, aes(x = solfege, y = avg_diss)) +
   geom_col() + 
   labs(title = "Average dissonance by scale degree, B sections") +
   xlab("Solfege") +
-  ylab("Mean")
+  ylab("Mean") +
+  theme_minimal()
   
 ```
 
@@ -126,7 +152,6 @@ ggplot(solf_dissB_summary, aes(x = solfege, y = avg_diss)) +
 
 # Comparison of A vs. B sections
 
-# Discussion
 
 ```{r}
 ## dissonance data
@@ -213,9 +238,11 @@ solf_dissB_summary <- pivot_longer(
 
 ```
 
-Do the same process for "all" solfege pitches, including those that are dissonant
 
 ```{r}
+
+# Do the same process for "all" solfege pitches, including those that are dissonant
+
 #read in data
 SD_A=read_csv("A_SD_dur.txt", show_col_types=FALSE)
 
@@ -426,4 +453,5 @@ all_joined <- diss_diff |>
 
 
 ```
+# Discussion
 
