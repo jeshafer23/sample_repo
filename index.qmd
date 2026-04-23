@@ -55,188 +55,8 @@ The information about all scale degrees and then the dissonant scale degrees is 
 
 # Complete scale degree data
 
-# Summary of "dissonance" data
-
-
-## Row {height = 50%}
-
-```{r}
-#since NA values truly do represent a non-occurrence of an event (all of these are events being counted, I'm going to replace all of the NA values with 0)
-
-#function to fill in zeroes
-fill_zeroes = function(vec){
-  replace_na({{ vec }}, 0)
-}
-
-#read in data
-solf_dissA=read_csv("A_solf_diss.txt",show_col_types=FALSE)
-solf_dissB=read_csv("B_solf_diss.txt",show_col_types=FALSE)
-
-
-#fill all data that is numeric, since all are numeric except for the tune titles
-solf_dissA_zeroes <- solf_dissA |> mutate(
-    across(where(is.numeric),fill_zeroes)
-    )
-solf_dissB_zeroes <- solf_dissB |> mutate(
-    across(where(is.numeric),fill_zeroes)
-    )
-
-
-#collapse columns by summing 
-solf_dissA_cleaned <- solf_dissA_zeroes |> 
-  mutate(mi_e = me + mi) |> 
-  mutate(fa_i = fa + fi) |> 
-  mutate(la_e = la + le) |> 
-  mutate(te_i = te + ti) |> 
-  select (Tune_name,do, re, mi_e, fa_i, so, la_e, te_i, Other)
-
-#an alternative:
-solf_dissA_cleaned <- solf_dissA_zeroes |> 
-  mutate(
-    mi_e = me + mi,
-    fa_i = fa + fi,
-    la_e = la + le,
-    te_i = te + ti
-  ) |> 
-  select (Tune_name, do, re, mi_e, fa_i, so, la_e, te_i, Other)
-
-solf_dissB_cleaned <- solf_dissB_zeroes |> 
-  mutate(mi_e = me + mi) |> 
-  mutate(fa_i = fa + fi) |> 
-  mutate(la_e = la + le) |> 
-  mutate(te_i = te + ti) |> 
-  select (Tune_name,do, re, mi_e, fa_i, so, la_e, te_i, Other)
-
-#pivot longer, calculate average amount of dissonance on each scale degree
-solf_dissA_summary <- pivot_longer(
-  solf_dissA_cleaned,
-  cols=c("do","re","mi_e","fa_i","so","la_e","te_i","Other"),
-  names_to = "solfege",
-  values_to = "count"
-  ) |> 
-  group_by(solfege) |> 
-  summarize(
-    avg_diss = mean(count)
-  )
-
-solf_dissB_summary <- pivot_longer(
-  solf_dissB_cleaned,
-  cols=c("do","re","mi_e","fa_i","so","la_e","te_i","Other"),
-  names_to = "solfege",
-  values_to = "count"
-  ) |> 
-  group_by(solfege) |> 
-  summarize(
-    avg_diss = mean(count)
-  )
-
-ggplot(solf_dissA_summary, aes(x = solfege, y = avg_diss)) +
-  geom_col() + 
-  labs(title = "Average dissonance by scale degree, A sections") +
-  xlab("Solfege") +
-  ylab("Mean") +
-  theme_minimal()
-```
-
-```{r}
-ggplot(solf_dissB_summary, aes(x = solfege, y = avg_diss)) +
-  geom_col() + 
-  labs(title = "Average dissonance by scale degree, B sections") +
-  xlab("Solfege") +
-  ylab("Mean") +
-  theme_minimal()
-  
-```
-
-
-
-# Comparison of A vs. B sections
-
-
-```{r}
-## dissonance data
-
-#since NA values truly do represent a non-occurrence of an event (all of these are events being counted, I'm going to replace all of the NA values with 0)
-
-#function to fill in zeroes
-fill_zeroes = function(vec){
-  replace_na({{ vec }}, 0)
-}
-
-## handle all of the dissonance data first
-
-#read in data
-solf_dissA=read_csv("A_solf_diss.txt",show_col_types=FALSE)
-solf_dissB=read_csv("B_solf_diss.txt",show_col_types=FALSE)
-
-
-#fill all data that is numeric, since all are numeric except for the tune titles
-solf_dissA_zeroes <- solf_dissA |> mutate(
-    across(where(is.numeric),fill_zeroes)
-    )
-solf_dissB_zeroes <- solf_dissB |> mutate(
-    across(where(is.numeric),fill_zeroes)
-    )
-
-
-#collapse columns by summing 
-solf_dissA_cleaned <- solf_dissA_zeroes |> 
-  mutate(mi_e = me + mi) |> 
-  mutate(fa_i = fa + fi) |> 
-  mutate(la_e = la + le) |> 
-  mutate(te_i = te + ti) |> 
-  select (Tune_name,do, re, mi_e, fa_i, so, la_e, te_i, Other)
-
-#an alternative:
-solf_dissA_cleaned <- solf_dissA_zeroes |> 
-  mutate(
-    mi_e = me + mi,
-    fa_i = fa + fi,
-    la_e = la + le,
-    te_i = te + ti
-  ) |> 
-  select (Tune_name, do, re, mi_e, fa_i, so, la_e, te_i, Other)
-
-solf_dissB_cleaned <- solf_dissB_zeroes |> 
-  mutate(mi_e = me + mi) |> 
-  mutate(fa_i = fa + fi) |> 
-  mutate(la_e = la + le) |> 
-  mutate(te_i = te + ti) |> 
-  select (Tune_name,do, re, mi_e, fa_i, so, la_e, te_i, Other)
-
-#pivot longer, calculate average amount of dissonance on each scale degree
-solf_dissA_summary <- pivot_longer(
-  solf_dissA_cleaned,
-  cols=c("do","re","mi_e","fa_i","so","la_e","te_i","Other"),
-  names_to = "solfege",
-  values_to = "count"
-  ) |> 
-  group_by(solfege) |> 
-  summarize(
-    avg_diss = mean(count)
-  )
-
-solf_dissB_summary <- pivot_longer(
-  solf_dissB_cleaned,
-  cols=c("do","re","mi_e","fa_i","so","la_e","te_i","Other"),
-  names_to = "solfege",
-  values_to = "count"
-  ) |> 
-  group_by(solfege) |> 
-  summarize(
-    avg_diss = mean(count)
-  )
-
-```
-
-
-```{r}
-
-
-
-
-
-```
+## Row {height = 90%}
+::: {.card title="Average scale degree, A sections"}
 
 
 ```{r}
@@ -262,6 +82,10 @@ SD_B <- SD_B |>
     across(where(is.logical), as.numeric)
   )
 
+#function to fill in zeroes
+fill_zeroes = function(vec){
+  replace_na({{ vec }}, 0)
+}
 
 #fill all data that is numeric, since all are numeric except for the tune titles
 SD_A_zeroes <- SD_A |> mutate(
@@ -275,56 +99,198 @@ SD_B_zeroes <- SD_B |> mutate(
 #collapse columns by summing 
 SD_A_cleaned <- SD_A_zeroes |> 
   mutate(
-    one = `1` + `1+` + `1-`,
-    two = `2` + `2+` + `2-`,
-    three = `3` + `3+` + `3-`,
-    four = `4` + `4+`,
-    five = `5` + `5+` + `5-`,
-    six = `6` + `6+` + `6-`,
-    seven = `7` + `7-`,
+    SD1 = `1` + `1+` + `1-`,
+    SD2 = `2` + `2+` + `2-`,
+    SD3 = `3` + `3+` + `3-`,
+    SD4 = `4` + `4+`,
+    SD5 = `5` + `5+` + `5-`,
+    SD6 = `6` + `6+` + `6-`,
+    SD7 = `7` + `7-`,
   ) |> 
-  select (Tune_name,one, two, three, four, five, six, seven, r, Other)
+  select (Tune_name, SD1, SD2, SD3, SD4, SD5, SD6, SD7, Other)
 
 SD_B_cleaned <- SD_B_zeroes |> 
   mutate(
-    one = `1` + `1+` + `1-`,
-    two = `2` + `2+` + `2-`,
-    three = `3` + `3+` + `3-`,
-    four = `4` + `4+`,
-    five = `5` + `5+` + `5-`,
-    six = `6` + `6+` + `6-`,
-    seven = `7` + `7-`,
+    SD1 = `1` + `1+` + `1-`,
+    SD2 = `2` + `2+` + `2-`,
+    SD3 = `3` + `3+` + `3-`,
+    SD4 = `4` + `4+`,
+    SD5 = `5` + `5+` + `5-`,
+    SD6 = `6` + `6+` + `6-`,
+    SD7 = `7` + `7-`,
   ) |> 
-  select (Tune_name,one, two, three, four, five, six, seven, r, Other)
-
+  select (Tune_name, SD1, SD2, SD3, SD4, SD5, SD6, SD7, Other)
 
 
 #pivot longer, calculate average amount of dissonance on each scale degree
 SD_A_summary <- pivot_longer(
   SD_A_cleaned,
-  cols=c("one","two","three","four","five","six","seven","r","Other"),
+  cols=c("SD1","SD2","SD3","SD4","SD5","SD6","SD7"),
   names_to = "scale_deg",
   values_to = "count"
   ) |> 
   group_by(scale_deg) |> 
   summarize(
-    avg_diss = mean(count)
+    avg_SD = mean(count)
   )
 
 SD_B_summary <- pivot_longer(
   SD_B_cleaned,
-  cols=c("one","two","three","four","five","six","seven","r","Other"),
+  cols=c("SD1","SD2","SD3","SD4","SD5","SD6","SD7"),
   names_to = "scale_deg",
   values_to = "count"
   ) |> 
   group_by(scale_deg) |> 
   summarize(
-    avg_diss = mean(count)
+    avg_SD = mean(count)
   )
+
+ggplot(SD_A_summary, aes(x = scale_deg, y = avg_SD)) +
+  geom_col(fill = "#162960") + 
+  xlab("Solfege") +
+  ylab("Mean") +
+  theme_minimal() +
+  ylim(0,65) +
+    geom_text(aes(label = round(avg_SD,2)), vjust = -0.5) # vjust moves label above the bar
+
+
 
 
 ```
+:::
+::: {.card title="Average scale degree, B sections"}
 
+```{r}
+ggplot(SD_B_summary, aes(x = scale_deg, y = avg_SD)) +
+  geom_col(fill = "#162960") + 
+  xlab("Solfege") +
+  ylab("Mean") +
+  theme_minimal() +
+  ylim(0,65) +
+  geom_text(aes(label = round(avg_SD,2)), vjust = -0.5) 
+
+
+  
+```
+:::
+
+## Row {height = 10%}
+
+::: {.card title="Discussion"}
+
+These two graphs appear to have a fairly similar distribution, which is not too surprising. Scale degree 1 dominates both graphs, with scale degree 5 and then scale degree 3 as the next 2 "peaks." Though the total values are slightly different when comparing A to B, these differences are slight with the exception of scale degree 1. This information may prove interesting if it turns out that which scale degrees are treated as dissonance differs, since we have fairly similar distributions of scale degree at the outset.
+:::
+
+
+
+# Summary of "dissonance" data
+
+## Row {height = 70%}
+::: {.card title="Average dissonance by scale degree, A sections"}
+
+
+```{r}
+#since NA values truly do represent a non-occurrence of an event (all of these are events being counted, I'm going to replace all of the NA values with 0)
+
+
+#read in data
+solf_dissA=read_csv("A_solf_diss.txt",show_col_types=FALSE)
+solf_dissB=read_csv("B_solf_diss.txt",show_col_types=FALSE)
+
+
+#fill all data that is numeric, since all are numeric except for the tune titles
+solf_dissA_zeroes <- solf_dissA |> mutate(
+    across(where(is.numeric),fill_zeroes)
+    )
+solf_dissB_zeroes <- solf_dissB |> mutate(
+    across(where(is.numeric),fill_zeroes)
+    )
+
+
+#collapse columns by summing 
+solf_dissA_cleaned <- solf_dissA_zeroes |> 
+  mutate(
+    SD3 = me + mi,
+    SD4 = fa + fi,
+    SD6 = la + le,
+    SD7 = te + ti
+  ) |> 
+  rename(
+    SD1 = do,
+    SD2 = re,
+    SD5 = so
+  ) |> 
+  select (Tune_name, SD1, SD2, SD3, SD4, SD5, SD6, SD7, Other)
+
+solf_dissB_cleaned <- solf_dissB_zeroes |> 
+  mutate(
+    SD3 = me + mi,
+    SD4 = fa + fi,
+    SD6 = la + le,
+    SD7 = te + ti
+  ) |> 
+  rename(
+    SD1 = do,
+    SD2 = re,
+    SD5 = so
+  ) |> 
+  select (Tune_name, SD1, SD2, SD3, SD4, SD5, SD6, SD7, Other)
+  
+#pivot longer, calculate average amount of dissonance on each scale degree
+solf_dissA_summary <- pivot_longer(
+  solf_dissA_cleaned,
+  cols=c("SD1","SD2","SD3","SD4","SD5","SD6","SD7"),
+  names_to = "solfege",
+  values_to = "count"
+  ) |> 
+  group_by(solfege) |> 
+  summarize(
+    avg_diss = mean(count)
+  )
+
+solf_dissB_summary <- pivot_longer(
+  solf_dissB_cleaned,
+  cols=c("SD1","SD2","SD3","SD4","SD5","SD6","SD7"),
+  names_to = "solfege",
+  values_to = "count"
+  ) |> 
+  group_by(solfege) |> 
+  summarize(
+    avg_diss = mean(count)
+  )
+
+# solf_diss <- solf_dissA_summary |> left_join(solf_dissB_summary,join_by(solfege))
+# --> can I make this a grouped bar chart instead?
+
+ggplot(solf_dissA_summary, aes(x = solfege, y = avg_diss)) +
+  geom_col(fill = "#162960") + 
+  xlab("Solfege") +
+  ylab("Mean") +
+  theme_minimal() +
+  ylim(0,15) +
+  geom_text(aes(label = round(avg_diss,2)), vjust = -0.5) 
+
+```
+:::
+::: {.card title="Average dissonance by scale degree, B sections"}
+
+
+```{r}
+ggplot(solf_dissB_summary, aes(x = solfege, y = avg_diss)) +
+  geom_col(fill = "#162960") + 
+  xlab("Solfege") +
+  ylab("Mean") +
+  theme_minimal() +
+  ylim(0,15) +
+  geom_text(aes(label = round(avg_diss,2)), vjust = -0.5) 
+  
+```
+
+:::
+
+# Comparison of A vs. B sections
+
+## Row {height = 50%}
 
 
 ```{r}
@@ -340,79 +306,48 @@ split_names = function(df, tune_name){
     delim = ".", 
     names = c("tune_name","krn","content","filetype"),
     too_many = "merge"
-  )
+  ) |> 
+    select(-krn,-content,-filetype)
 }
+solf_dissA_join <- split_names(solf_dissA_cleaned,Tune_name)
+solf_dissB_join <- split_names(solf_dissB_cleaned,Tune_name)
+SD_A_join <- split_names(SD_A_cleaned,Tune_name)
+SD_B_join <- split_names(SD_B_cleaned,Tune_name)
 
-#split_names(solf_dissA_cleaned,Tune_name)
-
-solf_dissA_join <- solf_dissA_cleaned |> 
-  separate_wider_delim(
-    Tune_name,
-    delim = ".", 
-    names = c("tune_name","krn","content","filetype"),
-    too_many = "merge"
-  )
-
-solf_dissB_join <- solf_dissB_cleaned |> 
-  separate_wider_delim(
-    Tune_name,
-    delim = ".", 
-    names = c("tune_name","krn","content","filetype"),
-    too_many = "merge"
-  )
-
-
-SD_A_join <- SD_A_cleaned |> 
-  separate_wider_delim(
-    Tune_name,
-    delim = ".", 
-    names = c("tune_name","krn","content","filetype"),
-    too_many = "merge"
-  )
-
-
-SD_B_join <- SD_B_cleaned |> 
-  separate_wider_delim(
-    Tune_name,
-    delim = ".", 
-    names = c("tune_name","krn","content","filetype"),
-    too_many = "merge"
-  )
 
 SD_diff <- SD_A_join |> 
   inner_join(SD_B_join, by = "tune_name", suffix = c("A","B")) |> 
   mutate(
-    SD1_diff = oneA-oneB,
-    SD2_diff = twoA-twoB,
-    SD3_diff = threeA-threeB,
-    SD4_diff = fourA-fourB,
-    SD5_diff = fiveA-fiveB,
-    SD6_diff = sixA-sixB,
-    SD7_diff = sevenA-sevenB,
-    SDOther_diff = OtherA-OtherB
+    SD1_diff = SD1A-SD1B,
+    SD2_diff = SD2A-SD2B,
+    SD3_diff = SD3A-SD3B,
+    SD4_diff = SD4A-SD4B,
+    SD5_diff = SD5A-SD5B,
+    SD6_diff = SD6A-SD6B,
+    SD7_diff = SD7A-SD7B,
   )
 
 diss_diff <- solf_dissA_join |> 
   inner_join(solf_dissB_join, by = "tune_name", suffix = c("A","B")) |> 
   mutate(
-    SD1_diss_diff = doA-doB,
-    SD2_diss_diff = reA-reB,
-    SD3_diss_diff = mi_eA-mi_eB,
-    SD4_diss_diff = fa_iA-fa_iB,
-    SD5_diss_diff = soA-soB,
-    SD6_diss_diff = la_eA-la_eB,
-    SD7_diss_diff = te_iA-te_iB,
-    SDOther_diss_diff = OtherA-OtherB
+    SD1_diff = SD1A-SD1B,
+    SD2_diff = SD2A-SD2B,
+    SD3_diff = SD3A-SD3B,
+    SD4_diff = SD4A-SD4B,
+    SD5_diff = SD5A-SD5B,
+    SD6_diff = SD6A-SD6B,
+    SD7_diff = SD7A-SD7B,
+    SDOther_diff = OtherA-OtherB
   ) |> 
   select(
-    tune_name,SD1_diss_diff,SD2_diss_diff,SD3_diss_diff,SD4_diss_diff,SD5_diss_diff,SD6_diss_diff,SD7_diss_diff,SDOther_diss_diff
+    tune_name,SD1_diff,SD2_diff,SD3_diff,SD4_diff,SD5_diff,SD6_diff,SD7_diff,SDOther_diff
     )
 
 # summarizes the average differences per solfege for all (not dissonant)
 SD_diff_summary <- pivot_longer(
   SD_diff,
   cols=c(
-    "SD1_diff","SD2_diff","SD3_diff","SD4_diff","SD5_diff","SD6_diff","SD7_diff","SDOther_diff"
+    "SD1_diff","SD2_diff","SD3_diff","SD4_diff","SD5_diff","SD6_diff","SD7_diff",
     ),
   names_to = "SD_diff",
   values_to = "count"
@@ -426,7 +361,7 @@ SD_diff_summary <- pivot_longer(
 diss_diff_summary <- pivot_longer(
   diss_diff,
   cols=c(
-    "SD1_diss_diff","SD2_diss_diff","SD3_diss_diff","SD4_diss_diff","SD5_diss_diff","SD6_diss_diff","SD7_diss_diff","SDOther_diss_diff"
+    "SD1_diff","SD2_diff","SD3_diff","SD4_diff","SD5_diff","SD6_diff","SD7_diff",
     ),
   names_to = "diss_solfege",
   values_to = "count"
@@ -436,22 +371,118 @@ diss_diff_summary <- pivot_longer(
     avg_diss = mean(count)
   )
 
-ggplot(diss_diff_summary, aes(x = diss_solfege, y = avg_diss)) +
-  geom_col()
+ggplot(diss_diff_summary, aes(x = diss_solfege, y = avg_diss,fill = avg_diss< 0)) +
+  geom_col() + 
+  labs(title = "Average dissonance difference by scale degree (pairwise), A-B section") +
+  xlab("Dissonant SD") +
+  ylab("Mean") +
+  theme_minimal() + 
+  scale_fill_manual(values = c( "#162960", "#fada92")) +
+  theme(legend.position = "none")
 
-ggplot(SD_diff_summary, aes(x = SD_diff, y = avg_diss)) +
-  geom_col()
+
+
+
+
+```
+
+```{r}
+ggplot(SD_diff_summary, aes(x = SD_diff, y = avg_diss, fill = avg_diss<0)) +
+  geom_col() +
+  labs(title = "Average difference by scale degree (pairwise), A-B section") +
+  xlab("All SD") +
+  ylab("Mean") +
+  theme_minimal() +
+  scale_fill_manual(values = c( "#162960", "#fada92")) +
+  theme(legend.position = "none")
+
+
+
+```
+# Comparison of proportions
+
+## Row {height = 50%}
+
+
+```{r}
+
+# join the SD and the diss SD, calculate proportions, fill props with zeroes if there were no SD in the first place
+A_joined <- SD_A_join |> 
+  inner_join(solf_dissA_join, by = "tune_name", suffix = c("_reg","_diss")) |> 
+  mutate(
+    SD1_prop = SD1_diss/SD1_reg,
+    SD2_prop = SD2_diss/SD2_reg,
+    SD3_prop = SD3_diss/SD3_reg,
+    SD4_prop = SD4_diss/SD4_reg,
+    SD5_prop = SD5_diss/SD5_reg,
+    SD6_prop = SD6_diss/SD6_reg,
+    SD7_prop = SD7_diss/SD7_reg,
+   ) |> 
+  mutate(
+    across(where(is.numeric),fill_zeroes)
+    ) |> 
+  select (tune_name,SD1_prop,SD2_prop,SD3_prop,SD4_prop,SD5_prop,SD6_prop,SD7_prop)
+
+
+B_joined <- SD_B_join |> 
+  inner_join(solf_dissB_join, by = "tune_name", suffix = c("_reg","_diss")) |> 
+  mutate(
+    SD1_prop = SD1_diss/SD1_reg,
+    SD2_prop = SD2_diss/SD2_reg,
+    SD3_prop = SD3_diss/SD3_reg,
+    SD4_prop = SD4_diss/SD4_reg,
+    SD5_prop = SD5_diss/SD5_reg,
+    SD6_prop = SD6_diss/SD6_reg,
+    SD7_prop = SD7_diss/SD7_reg,
+   ) |> 
+  mutate(
+    across(where(is.numeric),fill_zeroes)
+    ) |> 
+  select (tune_name,SD1_prop,SD2_prop,SD3_prop,SD4_prop,SD5_prop,SD6_prop,SD7_prop)
+
+A_prop_summary <- pivot_longer(
+  A_joined,
+  cols=c(
+    "SD1_prop","SD2_prop","SD3_prop","SD4_prop","SD5_prop","SD6_prop","SD7_prop",
+    ),
+  names_to = "Diss_proportions",
+  values_to = "prop_diss"
+  ) |> mutate(prop_diss = ifelse(prop_diss>1,1,prop_diss))
+
+B_prop_summary <- pivot_longer(
+  B_joined,
+  cols=c(
+    "SD1_prop","SD2_prop","SD3_prop","SD4_prop","SD5_prop","SD6_prop","SD7_prop",
+    ),
+  names_to = "Diss_proportions",
+  values_to = "prop_diss"
+  ) |> mutate(prop_diss = ifelse(prop_diss>1,1,prop_diss))
+ 
+
+
+
+ggplot(A_prop_summary, aes(tune_name, Diss_proportions, fill= prop_diss)) + 
+  geom_tile() +
+  theme(axis.text.x = element_blank()) +
+  scale_fill_distiller(palette = "RdPu") 
+
+
 
 
 ```
 
 ```{r}
 
+ggplot(B_prop_summary, aes(tune_name, Diss_proportions, fill= prop_diss)) + 
+  geom_tile() +
+  theme(axis.text.x = element_blank()) +
+  scale_fill_distiller(palette = "RdPu") 
 
-all_joined <- diss_diff |> 
-  left_join(SD_diff, by = join_by(tune_name))
 
-
+# join the two together
+all_joined <- A_joined |>
+  left_join(B_joined, by = join_by(tune_name),suffix = (c("A","B")))
 ```
+
 # Discussion
 
