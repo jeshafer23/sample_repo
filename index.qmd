@@ -21,11 +21,13 @@ library(tidyverse)
 ::: {.card}
 Contra dance is a "cousin" of English Country Dance and square dance, and is a popular form of social dance in America, Canada, and parts of Europe. Contra is a "called" dance, meaning that a person in the role of the "caller" prompts each piece of the choreography in time with the music. It is also a social dance, where dancers pair up with different partners for each dance and interact with many other dancers in the course of a given dance.
 
-Contra dance choreographies have a fairly strict structure, which assumes there are a total of 4 sections of equal length. The first 2 sections are the same (or nearly the same), and the last 2 sectiosn are also the same (or nearly the same). For ease of reference, musicians, callers, and dancers usually refer to these as "A" and "B" sections. So, the four sections of the dance are usually A, A, B, B (or A, A1, B, B1 if there are slight variations in the repetition of each of the main sections).
+Contra dance choreographies have a fairly strict structure, which assumes there are a total of 4 sections of equal length. The first 2 sections are the same (or nearly the same), and the last 2 sections are also the same (or nearly the same). For ease of reference, musicians, callers, and dancers usually refer to these as "A" and "B" sections. So, the four sections of the dance are usually A, A, B, B (or A, A1, B, B1 if there are slight variations in the repetition of each of the main sections). As a dance progresses, the dancers loop through this same structure at least 8-10 times (dependent on the number of dancers present).
 
-Because of this fairly strict structure, I'm curious about the musical structure of the tunes that go along with these choreographies. This project is part of a larger study I'm working on that examines 934 tunes (drawn from *The Portland Collection*, a well-known tune book that includes both traditional and modern tunes). The dataset used in this project was previously created by using a symbolic music notation system (Humdrum) to encode the dances, and then pull out and analyze various musical information about them.
+![](choreo_graph.png){width=400}
 
-For this specific project, I'm focusing on the melody of the tunes and looking at the differences between how A vs. B sections treat musical dissonance. When we think about musical dissonance we are usually thinking about melody notes (the main part of the tune) and how they relate to the "back-up" parts (the accompaniment).
+Because of this fairly strict structure, I'm curious about the musical structure of the tunes that go along with these choreographies. This project is part of a larger study I'm working on that examines 934 tunes (drawn from *The Portland Collection*, a well-known tune book that includes both traditional and modern tunes). The dataset used in this project was previously created by using a symbolic music notation system (Humdrum) to encode the dances in a way that makes them easily searchable *en masse*, so I can then pull out and analyze various musical information about them.
+
+The underlying hypothesis of this project, based on participant-observation experience, is that the "B" sections of the music are more likely to contain energy-generating characteristics. Within the cycle of the dance, this would serve to create an extra increase of energy as we approach the "top" of the tune again and then begin repeating the cycle. One characteristic which can serve to create tension (and therefore energy) in musical contexts is musical dissonance. For this specific project, I'm focusing on the melody of the tunes and looking at the differences between how A vs. B sections treat musical dissonance. When we think about musical dissonance we are usually thinking about melody notes (the main part of the tune) and how they relate to the "back-up" parts (the accompaniment).
 
 This study will use scale-degree numbers to refer to individual pitches within the various tunes. When we think of musical scales, we often simply number the consecutive pitches by a given point of reference, based on the starting point of the scale. The numbers will run from 1 to 7 and then start over, as shown below:
 
@@ -53,9 +55,10 @@ In order to look at how these tunes use dissonance, the data presented here firs
 The information about all scale degrees and then the dissonant scale degrees is examined first for all A sections as a whole, then all B sections as a whole, and then finally a pairwise comparison to see what differences exist for the A and B usages within each tune.
 :::
 
+
 # Complete scale degree data
 
-## Row {height = 90%}
+## Row {height=60%}
 ::: {.card title="Average scale degree, A sections"}
 
 
@@ -147,7 +150,7 @@ SD_B_summary <- pivot_longer(
 
 ggplot(SD_A_summary, aes(x = scale_deg, y = avg_SD)) +
   geom_col(fill = "#162960") + 
-  xlab("Solfege") +
+  xlab("Scale degree") +
   ylab("Mean") +
   theme_minimal() +
   ylim(0,65) +
@@ -161,9 +164,10 @@ ggplot(SD_A_summary, aes(x = scale_deg, y = avg_SD)) +
 ::: {.card title="Average scale degree, B sections"}
 
 ```{r}
+#| padding: (0)
 ggplot(SD_B_summary, aes(x = scale_deg, y = avg_SD)) +
   geom_col(fill = "#162960") + 
-  xlab("Solfege") +
+  xlab("Scale degree") +
   ylab("Mean") +
   theme_minimal() +
   ylim(0,65) +
@@ -174,18 +178,20 @@ ggplot(SD_B_summary, aes(x = scale_deg, y = avg_SD)) +
 ```
 :::
 
-## Row {height = 10%}
+## Row {height=40%}
 
 ::: {.card title="Discussion"}
 
-These two graphs appear to have a fairly similar distribution, which is not too surprising. Scale degree 1 dominates both graphs, with scale degree 5 and then scale degree 3 as the next 2 "peaks." Though the total values are slightly different when comparing A to B, these differences are slight with the exception of scale degree 1. This information may prove interesting if it turns out that which scale degrees are treated as dissonance differs, since we have fairly similar distributions of scale degree at the outset.
+These graphs were created by simple averages the A and B sections respectively, with all "types" of each scale degree collapsed into one category (as descirbed in the Introduction). In other words, if there were #3, b3, or regular 3 in a given tune, all of those are counted as just "3." Each section is treated separately here, with the average across all instances of that section. Ultimately we will look at paired data *within* each tune, but in order to first get a sense of the overall tendencies of each section, they are looked at within their sectional groupings first.
+
+These two graphs appear to have a fairly similar distribution, which is not too surprising. Scale degree 1 dominates both graphs, with scale degree 5 and then scale degree 3 as the next 2 "peaks." (This is unsurprising since these are the notes of the first triad of the scale, which we sometimes refer to as the "home" triad.) Though the total values are slightly different when comparing A to B, these differences are slight with the exception of scale degree 1. This information may prove interesting if it turns out that which scale degrees are treated as dissonance differs, since we have fairly similar distributions of complete scale degree at the outset.
 :::
 
 
 
-# Summary of "dissonance" data
+# Complete "dissonance" data
 
-## Row {height = 70%}
+## Row {height=60%}
 ::: {.card title="Average dissonance by scale degree, A sections"}
 
 
@@ -264,7 +270,7 @@ solf_dissB_summary <- pivot_longer(
 
 ggplot(solf_dissA_summary, aes(x = solfege, y = avg_diss)) +
   geom_col(fill = "#162960") + 
-  xlab("Solfege") +
+  xlab("Scale degree") +
   ylab("Mean") +
   theme_minimal() +
   ylim(0,15) +
@@ -278,7 +284,7 @@ ggplot(solf_dissA_summary, aes(x = solfege, y = avg_diss)) +
 ```{r}
 ggplot(solf_dissB_summary, aes(x = solfege, y = avg_diss)) +
   geom_col(fill = "#162960") + 
-  xlab("Solfege") +
+  xlab("Scale degree") +
   ylab("Mean") +
   theme_minimal() +
   ylim(0,15) +
@@ -288,9 +294,22 @@ ggplot(solf_dissB_summary, aes(x = solfege, y = avg_diss)) +
 
 :::
 
-# Comparison of A vs. B sections
+## Row {height=40%}
 
-## Row {height = 50%}
+::: {.card title="Discussion"}
+
+Similar to the previous page, these two graphs are made by averaging the total dissonant scale degrees within each section group. These two graphs suggest some interesting points of observation, both compared to each other and compared to the previous page.
+
+First, SD1 and SD5 are some of the smallest bars on each of these graphs, when they were the largest on the previous page. (SD5 is the smallest on each, followed by SD7, and then SD1). SD2, 4th largest on the previous graphs, is now the tallest in each of these graphs. It therefore appears that, at least in terms of the aggregate results, the different SD have different tendencies in terms of being used as a dissonance or not.
+
+The comparison between the A and B sections still suggests fairly similar distributions--both peak at SD 2 and have their lowest number at SD 5, with SD 1 and SD7 also being low. SD 2, 4, and 6 vary in terms of their exact placement but tend to have somewhat similar numbers.
+:::
+
+# Pairwise comparisons
+
+## Row {height=60%}
+::: {.card title="Average difference by scale degree (pairwise), A-B section"}
+
 
 
 ```{r}
@@ -371,25 +390,8 @@ diss_diff_summary <- pivot_longer(
     avg_diss = mean(count)
   )
 
-ggplot(diss_diff_summary, aes(x = diss_solfege, y = avg_diss,fill = avg_diss< 0)) +
-  geom_col() + 
-  labs(title = "Average dissonance difference by scale degree (pairwise), A-B section") +
-  xlab("Dissonant SD") +
-  ylab("Mean") +
-  theme_minimal() + 
-  scale_fill_manual(values = c( "#162960", "#fada92")) +
-  theme(legend.position = "none")
-
-
-
-
-
-```
-
-```{r}
 ggplot(SD_diff_summary, aes(x = SD_diff, y = avg_diss, fill = avg_diss<0)) +
   geom_col() +
-  labs(title = "Average difference by scale degree (pairwise), A-B section") +
   xlab("All SD") +
   ylab("Mean") +
   theme_minimal() +
@@ -398,11 +400,59 @@ ggplot(SD_diff_summary, aes(x = SD_diff, y = avg_diss, fill = avg_diss<0)) +
 
 
 
+
+
+
+
 ```
-# Comparison of proportions
+:::
+::: {.card title="Average dissonance difference by scale degree (pairwise), A-B section"}
 
-## Row {height = 50%}
 
+```{r}
+
+
+ggplot(diss_diff_summary, aes(x = diss_solfege, y = avg_diss,fill = avg_diss< 0)) +
+  geom_col() + 
+  xlab("Dissonant SD") +
+  ylab("Mean") +
+  theme_minimal() + 
+  scale_fill_manual(values = c( "#162960", "#fada92")) +
+  theme(legend.position = "none")
+
+
+```
+:::
+
+## Row {height=40%}
+
+::: {.card title="Pairwise scale degree discussion"}
+In this graph, a pairwise comparison first measures the difference in each scale degree (A-B) and then creates an average of those scale degree differences across all tunes. A positive (blue) value will mean that there are, on average, more of that scale degree in A vs. B, a negative (gold) value will mean that there are, on average, more of that scale degree in B vs. A, and a 0 value will mean that, on average, the scale degree presence is the same.
+
+Perhaps unsurprisingly given our first set of graphs, the power of the "home" triad (SD 1, 3, and 5) is again visible here, creating the only positive values (though SD 5 is fairly close to 0). SD 2 and 4 are also fairly close to 0, approaching from the negative side, while SD 6 and 7 indicate a stronger lean towards the B sections.
+:::
+
+::: {.card title="Pairwise dissonance discussion"}
+This graph is constructed similarly to the pairwise average differences, but examines only the scale degrees that are dissonant. As we might expect based on the first two pages and the other pairwise difference graph, we now see a very strong separation between the "home triad" and the other scale degrees. SD 1, and 5, and are all negative (with SD5 being more strongly negative than the others), and SD 2, 4, and 6 are all positive. SD7 is also negative but near 0.
+
+These results would suggest that dissonance on the "home triad" is treated differently in A vs. B sections. Or, perhaps another way of looking at it, that SD 2, 4, and 6 are more often treated as dissonances in A sections (where, perhaps, the "home triad" is more present), and SD 1, 3, and 5 are more often treated as dissonances in the B sections (where the "home triad" is less common). This has potential to align with the underlying hypothesis, that musical elements which create energy or tension are more likely to happen in the B section.
+
+That said, most of these dissonance are relatively small, so the impact of these differences may nto be significant.
+:::
+
+
+# A look at proportions
+## Row {height=40%}
+::: {.card title="Motivation for study of proportions"}
+Though there are certainly plenty of other ways that it might be useful to look at this data, one quest that may well come to mind is whether looking at just averages is actually useful. There are 964 tunes in this dataset, but even with a reasonably large "n", it won't give a clear picture of cases where, say, SD6 only occurred 3 times but was dissonant 100% of the time. This would enter the "average" as a count of 3, but would perhaps be more important to note that it was actually 100% dissonant.
+
+The two graphs below again separate out each section but examine the proportion of dissonance of each scale degree relative to its presence in the individual tune, represented as a heatmap. Dark colors represent a low proportion of dissonance and light colors represent a high proportion of dissonance, compared to the total times the SD occurred in the tune itself. The tune names are suppressed on the x-axis for the sake of legibility.
+
+The two graphs do show variation in the patterns within each "row" (each horizontal band representing one SD), but in general these graphs do seem to tell a similar story to the previous: SD 1 and SD5 are much less dissonant than SD 2, 4, 6, or 7, and SD 3 stands in between those two groups.
+:::
+## Row {height=60%}
+
+::: {.card title="Proportions of dissonance, A sections"}
 
 ```{r}
 
@@ -464,25 +514,125 @@ B_prop_summary <- pivot_longer(
 ggplot(A_prop_summary, aes(tune_name, Diss_proportions, fill= prop_diss)) + 
   geom_tile() +
   theme(axis.text.x = element_blank()) +
-  scale_fill_distiller(palette = "RdPu") 
+  scale_fill_distiller(palette = "RdPu") +
+  xlab("Tunes (names suppressed)") +
+  ylab("Proportion of dissonance (diss SD/total SD)") + 
+  labs(fill = "Diss prop")
 
 
 
 
 ```
+:::
+
+::: {.card title="Proportions of dissonance, B sections"}
 
 ```{r}
 
 ggplot(B_prop_summary, aes(tune_name, Diss_proportions, fill= prop_diss)) + 
   geom_tile() +
   theme(axis.text.x = element_blank()) +
-  scale_fill_distiller(palette = "RdPu") 
+  scale_fill_distiller(palette = "RdPu") +
+  xlab("Tunes (names suppressed)") +
+  ylab("Proportion of dissonance (diss SD/total SD)") +
+  labs(fill = "Diss prop")
+```
+:::
+# Pairwise proportions
+## Row {height=100%}
 
 
+::: {.card title="Proportions of pairwise dissonance, A-B sections"}
+```{r}
 # join the two together
 all_joined <- A_joined |>
-  left_join(B_joined, by = join_by(tune_name),suffix = (c("A","B")))
+  left_join(B_joined, by = join_by(tune_name),suffix = (c("A","B"))) |> 
+  mutate(
+    SD1_diff_prop = SD1_propA-SD1_propB,
+    SD2_diff_prop = SD2_propA-SD2_propB,
+    SD3_diff_prop = SD3_propA-SD3_propB,
+    SD4_diff_prop = SD4_propA-SD4_propB,
+    SD5_diff_prop = SD5_propA-SD5_propB,
+    SD6_diff_prop = SD6_propA-SD6_propB,
+    SD7_diff_prop = SD7_propA-SD7_propB,
+  ) |> 
+  select(
+    tune_name,SD1_diff_prop,SD2_diff_prop,SD3_diff_prop,SD4_diff_prop,SD5_diff_prop,
+    SD6_diff_prop,SD7_diff_prop
+    )
+
+
+
+
+# summarizes the average differences per solfege for all (not dissonant)
+SD_diff_prop <- pivot_longer(
+  all_joined,
+  cols=c(
+    "SD1_diff_prop","SD2_diff_prop","SD3_diff_prop","SD4_diff_prop","SD5_diff_prop",
+    "SD6_diff_prop","SD7_diff_prop",
+    ),
+  names_to = "SD_diff_prop",
+  values_to = "count"
+  ) |> 
+  group_by(SD_diff_prop) |> 
+  summarize(
+    avg_diss_prop = mean(count)
+  )
+
+
+ggplot(SD_diff_prop, aes(x = SD_diff_prop, y = avg_diss_prop,fill = avg_diss_prop< 0)) +
+  geom_col() + 
+  xlab("Proportion of dissonance (diss SD/total SD)") +
+  ylab("Mean") +
+  theme_minimal() + 
+  scale_fill_manual(values = c( "#162960", "#fada92")) +
+  theme(legend.position = "none")
 ```
 
+:::
+
+::: {.card title="Discussion of pairwise proportions"}
+Finally, we could examine a difference of these proportions, similar to the previous examination of a difference of averages. Perhaps unsurprisingly, we can note that:
+
+* SD 1, 3, and 5 have one behavior, and SD 2, 4, 6, and 7 have a different behavior
+  + The behavior of SD 7 is interesting here, though, since it had previously grouped (slightly) with SD 1, 3, and 5 on the last pairwise dissonance graph.
+
+* The behavior of SD 1, 3, and 5 again favors these SD being more likely to be dissonant in B sections, and vice versa for the other group of SD.
+
+* None of these proportion differences are particularly large, so, again, the impact of this effect if measured statistically may not be significant.
+
+:::
+
+
 # Discussion
+## Row {height=100%}
+
+::: {.card title="Summary"}
+:::
+
+::: {.card title="Further Resources"}
+
+- [Country Dance and Song Society]
+- [Dissertation on contra dance]
+- [Article from *Journal of Mathematics and the Arts* about using style features to predict choreography composition dates]
+- [Contra dances in Bozeman]
+- [Humdrum toolkit (symbolic system and toolkit for computational analysis of music)]
+- [The Portland Collection tunebooks]
+
+[Country Dance and Song Society]: https://cdss.org/
+
+[Dissertation on contra dance]: https://www.proquest.com/dissertations-theses/contra-dance-choreography-reflection-social/docview/304015962/se-2?accountid=28148
+
+
+[Article from *Journal of Mathematics and the Arts* about using style features to predict choreography composition dates]: https://scholar.google.com/scholar?hl=en&as_sdt=0%2C27&q=Using+stylistic+features+to+predict+the+composition+date+of+an+American+contra+dance&btnG=
+
+[Contra dances in Bozeman]: https://bozemanfolklore.org/contra-videos/
+
+[Humdrum toolkit (symbolic system and toolkit for computational analysis of music)]: https://www.humdrum.org/
+
+[The Portland Collection tunebooks]: https://www.theportlandcollection.com/
+
+
+
+:::
 
