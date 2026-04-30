@@ -11,6 +11,8 @@ embed-resources: true
 #| echo: false
 #| output: false
 #| message: false
+
+
 # functions needed to run
 library(tidyverse)
 
@@ -64,7 +66,7 @@ The information about all scale degrees and then the dissonant scale degrees is 
 
 ```{r}
 
-# Do the same process for "all" solfege pitches, including those that are dissonant
+# Analyze "all" solfege pitches, including those that are dissonant
 
 #read in data
 SD_A=read_csv("A_SD_dur.txt", show_col_types=FALSE)
@@ -90,6 +92,9 @@ fill_zeroes = function(vec){
   replace_na({{ vec }}, 0)
 }
 
+# since NA values truly do represent a non-occurrence of an event (all of these are events being counted), replace all of the NA values with 0)
+
+
 #fill all data that is numeric, since all are numeric except for the tune titles
 SD_A_zeroes <- SD_A |> mutate(
     across(where(is.numeric),fill_zeroes)
@@ -99,7 +104,7 @@ SD_B_zeroes <- SD_B |> mutate(
     across(where(is.numeric),fill_zeroes)
     )
 
-#collapse columns by summing 
+#collapse columns of "families" of SD by summing 
 SD_A_cleaned <- SD_A_zeroes |> 
   mutate(
     SD1 = `1` + `1+` + `1-`,
@@ -148,10 +153,11 @@ SD_B_summary <- pivot_longer(
     avg_SD = mean(count)
   )
 
+#create plot showing average count per scale degree
 ggplot(SD_A_summary, aes(x = scale_deg, y = avg_SD)) +
   geom_col(fill = "#162960") + 
   xlab("Scale degree") +
-  ylab("Mean") +
+  ylab("Mean (in sixteenth notes)") +
   theme_minimal() +
   ylim(0,65) +
     geom_text(aes(label = round(avg_SD,2)), vjust = -0.5) # vjust moves label above the bar
@@ -164,11 +170,11 @@ ggplot(SD_A_summary, aes(x = scale_deg, y = avg_SD)) +
 ::: {.card title="Average scale degree, B sections"}
 
 ```{r}
-#| padding: (0)
+#second plot for B sections
 ggplot(SD_B_summary, aes(x = scale_deg, y = avg_SD)) +
   geom_col(fill = "#162960") + 
   xlab("Scale degree") +
-  ylab("Mean") +
+  ylab("Mean (in sixteenth notes)") +
   theme_minimal() +
   ylim(0,65) +
   geom_text(aes(label = round(avg_SD,2)), vjust = -0.5) 
@@ -182,9 +188,11 @@ ggplot(SD_B_summary, aes(x = scale_deg, y = avg_SD)) +
 
 ::: {.card title="Discussion"}
 
-These graphs were created by simple averages the A and B sections respectively, with all "types" of each scale degree collapsed into one category (as descirbed in the Introduction). In other words, if there were #3, b3, or regular 3 in a given tune, all of those are counted as just "3." Each section is treated separately here, with the average across all instances of that section. Ultimately we will look at paired data *within* each tune, but in order to first get a sense of the overall tendencies of each section, they are looked at within their sectional groupings first.
+These graphs were created by simple averages of the A and B sections respectively, with all "types" of each scale degree collapsed into one category (as described in the Introduction). In other words, if there were instances of #3, b3, or regular 3 in a given tune, all of those are counted as just "3." Each section is treated separately here, with the average across all instances of that section. Ultimately we will look at paired data *within* each tune, but in order to first get a sense of the overall tendencies of each section, they are looked at within their sectional groupings first.
 
-These two graphs appear to have a fairly similar distribution, which is not too surprising. Scale degree 1 dominates both graphs, with scale degree 5 and then scale degree 3 as the next 2 "peaks." (This is unsurprising since these are the notes of the first triad of the scale, which we sometimes refer to as the "home" triad.) Though the total values are slightly different when comparing A to B, these differences are slight with the exception of scale degree 1. This information may prove interesting if it turns out that which scale degrees are treated as dissonance differs, since we have fairly similar distributions of complete scale degree at the outset.
+These two graphs appear to have a fairly similar distribution, which is not too surprising. SD 1 dominates both graphs, with SD 5 and then SD 3 as the next 2 "peaks." (This is unsurprising since these are the notes of the first chord of the scale, which we sometimes refer to as the "home" chord.) Though the total values are slightly different when comparing A to B, these differences are slight with the exception of SD 1. This information may prove interesting if it turns out that which scale degrees are treated as dissonance differs, since we have fairly similar distributions of complete scale degree at the outset.
+
+(Here and throughout, the scale degrees were sliced and/or quantized to a sixteenth-note in length, so the counts here are in sixteenth-notes.)
 :::
 
 
@@ -196,8 +204,7 @@ These two graphs appear to have a fairly similar distribution, which is not too 
 
 
 ```{r}
-#since NA values truly do represent a non-occurrence of an event (all of these are events being counted, I'm going to replace all of the NA values with 0)
-
+# Same process as above, but now only with the notes which were unsupported by the chords underneath them. 
 
 #read in data
 solf_dissA=read_csv("A_solf_diss.txt",show_col_types=FALSE)
@@ -213,7 +220,7 @@ solf_dissB_zeroes <- solf_dissB |> mutate(
     )
 
 
-#collapse columns by summing 
+#collapse columns into families by summing 
 solf_dissA_cleaned <- solf_dissA_zeroes |> 
   mutate(
     SD3 = me + mi,
@@ -241,6 +248,8 @@ solf_dissB_cleaned <- solf_dissB_zeroes |>
     SD5 = so
   ) |> 
   select (Tune_name, SD1, SD2, SD3, SD4, SD5, SD6, SD7, Other)
+
+# At this point, since the "Other" column was empty for the total SD above, it's clear that there were a few inconsistent points of encoding in the data. For now, the "Other" columns are dropped, and an adjustment is made later on to account for the few cases where something was coded as "Other" for solfege but as a number for the SD. This is likely an issue of nomenclature and since only a few examples had this anomaly, for the purposes of visualization I'm going to more-or-less override it below
   
 #pivot longer, calculate average amount of dissonance on each scale degree
 solf_dissA_summary <- pivot_longer(
@@ -265,13 +274,12 @@ solf_dissB_summary <- pivot_longer(
     avg_diss = mean(count)
   )
 
-# solf_diss <- solf_dissA_summary |> left_join(solf_dissB_summary,join_by(solfege))
-# --> can I make this a grouped bar chart instead?
+#create plot showing average count of dissonance per scale degree
 
 ggplot(solf_dissA_summary, aes(x = solfege, y = avg_diss)) +
   geom_col(fill = "#162960") + 
   xlab("Scale degree") +
-  ylab("Mean") +
+  ylab("Mean (in sixteenth notes)") +
   theme_minimal() +
   ylim(0,15) +
   geom_text(aes(label = round(avg_diss,2)), vjust = -0.5) 
@@ -282,10 +290,11 @@ ggplot(solf_dissA_summary, aes(x = solfege, y = avg_diss)) +
 
 
 ```{r}
+# second plot for B sections
 ggplot(solf_dissB_summary, aes(x = solfege, y = avg_diss)) +
   geom_col(fill = "#162960") + 
   xlab("Scale degree") +
-  ylab("Mean") +
+  ylab("Mean (in sixteenth notes)") +
   theme_minimal() +
   ylim(0,15) +
   geom_text(aes(label = round(avg_diss,2)), vjust = -0.5) 
@@ -300,15 +309,15 @@ ggplot(solf_dissB_summary, aes(x = solfege, y = avg_diss)) +
 
 Similar to the previous page, these two graphs are made by averaging the total dissonant scale degrees within each section group. These two graphs suggest some interesting points of observation, both compared to each other and compared to the previous page.
 
-First, SD1 and SD5 are some of the smallest bars on each of these graphs, when they were the largest on the previous page. (SD5 is the smallest on each, followed by SD7, and then SD1). SD2, 4th largest on the previous graphs, is now the tallest in each of these graphs. It therefore appears that, at least in terms of the aggregate results, the different SD have different tendencies in terms of being used as a dissonance or not.
+First, SD 1 and SD 5 are some of the smallest bars on each of these graphs, when they were the largest on the previous page. (SD 5 is the smallest on each, followed by SD 7, and then SD 1). SD 2, fourth largest on the previous graphs, is now the tallest in each of these graphs. It therefore appears that, at least in terms of the aggregate results, the different SD have different tendencies in terms of being used as a dissonance or not.
 
-The comparison between the A and B sections still suggests fairly similar distributions--both peak at SD 2 and have their lowest number at SD 5, with SD 1 and SD7 also being low. SD 2, 4, and 6 vary in terms of their exact placement but tend to have somewhat similar numbers.
+The comparison between the A and B sections still suggests fairly similar distributions--both peak at SD 2 and have their lowest number at SD 5, with SD 1 and SD 7 also being low. SD 2, 4, and 6 vary in terms of their exact placement but tend to have somewhat similar numbers.
 :::
 
 # Pairwise comparisons
 
 ## Row {height=60%}
-::: {.card title="Average difference by scale degree (pairwise), A-B section"}
+::: {.card title="Average difference by scale degree (pairwise), A section-B section"}
 
 
 
@@ -333,7 +342,7 @@ solf_dissB_join <- split_names(solf_dissB_cleaned,Tune_name)
 SD_A_join <- split_names(SD_A_cleaned,Tune_name)
 SD_B_join <- split_names(SD_B_cleaned,Tune_name)
 
-
+# join the two total SD dataframes and take differences of respective SD
 SD_diff <- SD_A_join |> 
   inner_join(SD_B_join, by = "tune_name", suffix = c("A","B")) |> 
   mutate(
@@ -346,6 +355,7 @@ SD_diff <- SD_A_join |>
     SD7_diff = SD7A-SD7B,
   )
 
+# same as above, but for the dissonances
 diss_diff <- solf_dissA_join |> 
   inner_join(solf_dissB_join, by = "tune_name", suffix = c("A","B")) |> 
   mutate(
@@ -362,6 +372,8 @@ diss_diff <- solf_dissA_join |>
     tune_name,SD1_diff,SD2_diff,SD3_diff,SD4_diff,SD5_diff,SD6_diff,SD7_diff,SDOther_diff
     )
 
+# Ultimately, the "Other" case is omitted here for the same reasons as above
+
 # summarizes the average differences per solfege for all (not dissonant)
 SD_diff_summary <- pivot_longer(
   SD_diff,
@@ -373,7 +385,7 @@ SD_diff_summary <- pivot_longer(
   ) |> 
   group_by(SD_diff) |> 
   summarize(
-    avg_diss = mean(count)
+    avg_diff = mean(count)
   )
 
 # summarizes the average differences per solfege for the dissonance
@@ -390,10 +402,11 @@ diss_diff_summary <- pivot_longer(
     avg_diss = mean(count)
   )
 
-ggplot(SD_diff_summary, aes(x = SD_diff, y = avg_diss, fill = avg_diss<0)) +
+# plot pairwise comparison for all SD, A-B sections
+ggplot(SD_diff_summary, aes(x = SD_diff, y = avg_diff, fill = avg_diff<0)) +
   geom_col() +
   xlab("All SD") +
-  ylab("Mean") +
+  ylab("Mean (in sixteenth notes)") +
   theme_minimal() +
   scale_fill_manual(values = c( "#162960", "#fada92")) +
   theme(legend.position = "none")
@@ -406,16 +419,16 @@ ggplot(SD_diff_summary, aes(x = SD_diff, y = avg_diss, fill = avg_diss<0)) +
 
 ```
 :::
-::: {.card title="Average dissonance difference by scale degree (pairwise), A-B section"}
+::: {.card title="Average dissonance difference by scale degree (pairwise), A section-B section"}
 
 
 ```{r}
 
-
+# plot pairwise comparisons for diss SD, A-B sections
 ggplot(diss_diff_summary, aes(x = diss_solfege, y = avg_diss,fill = avg_diss< 0)) +
   geom_col() + 
   xlab("Dissonant SD") +
-  ylab("Mean") +
+  ylab("Mean (in sixteenth notes)") +
   theme_minimal() + 
   scale_fill_manual(values = c( "#162960", "#fada92")) +
   theme(legend.position = "none")
@@ -429,26 +442,26 @@ ggplot(diss_diff_summary, aes(x = diss_solfege, y = avg_diss,fill = avg_diss< 0)
 ::: {.card title="Pairwise scale degree discussion"}
 In this graph, a pairwise comparison first measures the difference in each scale degree (A-B) and then creates an average of those scale degree differences across all tunes. A positive (blue) value will mean that there are, on average, more of that scale degree in A vs. B, a negative (gold) value will mean that there are, on average, more of that scale degree in B vs. A, and a 0 value will mean that, on average, the scale degree presence is the same.
 
-Perhaps unsurprisingly given our first set of graphs, the power of the "home" triad (SD 1, 3, and 5) is again visible here, creating the only positive values (though SD 5 is fairly close to 0). SD 2 and 4 are also fairly close to 0, approaching from the negative side, while SD 6 and 7 indicate a stronger lean towards the B sections.
+Perhaps unsurprisingly given our first set of graphs, the power of the "home" chord (SD 1, 3, and 5) is again visible here, creating the only positive values (though SD 5 is fairly close to 0). SD 2 and 4 are also fairly close to 0, approaching from the negative side, while SD 6 and 7 indicate a stronger lean towards the B sections.
 :::
 
 ::: {.card title="Pairwise dissonance discussion"}
-This graph is constructed similarly to the pairwise average differences, but examines only the scale degrees that are dissonant. As we might expect based on the first two pages and the other pairwise difference graph, we now see a very strong separation between the "home triad" and the other scale degrees. SD 1, and 5, and are all negative (with SD5 being more strongly negative than the others), and SD 2, 4, and 6 are all positive. SD7 is also negative but near 0.
+This graph is constructed similarly to the pairwise average differences, but examines only the scale degrees that are dissonant. As we might expect based on the first two pages and the other pairwise difference graph, we now see a very strong separation between the "home chord" and the other scale degrees. SD 1, 3, and 5, and are all negative (with SD5 being more strongly negative than the others), and SD 2, 4, and 6 are all positive. SD7 is also negative but near 0.
 
-These results would suggest that dissonance on the "home triad" is treated differently in A vs. B sections. Or, perhaps another way of looking at it, that SD 2, 4, and 6 are more often treated as dissonances in A sections (where, perhaps, the "home triad" is more present), and SD 1, 3, and 5 are more often treated as dissonances in the B sections (where the "home triad" is less common). This has potential to align with the underlying hypothesis, that musical elements which create energy or tension are more likely to happen in the B section.
+These results would suggest that dissonance on the "home" chord is treated differently in A vs. B sections. Or, perhaps another way of looking at it, that SD 2, 4, and 6 are more often treated as dissonances in A sections (where, perhaps, the "home" chord is more present), and SD 1, 3, and 5 are more often treated as dissonances in the B sections (where the "home" chord is less common). This has potential to align with the underlying hypothesis, that musical elements which create energy or tension are more likely to happen in the B section.
 
-That said, most of these dissonance are relatively small, so the impact of these differences may nto be significant.
+That said, most of these dissonance are relatively small, so the impact of these differences may not be statistically significant.
 :::
 
 
 # A look at proportions
 ## Row {height=40%}
 ::: {.card title="Motivation for study of proportions"}
-Though there are certainly plenty of other ways that it might be useful to look at this data, one quest that may well come to mind is whether looking at just averages is actually useful. There are 964 tunes in this dataset, but even with a reasonably large "n", it won't give a clear picture of cases where, say, SD6 only occurred 3 times but was dissonant 100% of the time. This would enter the "average" as a count of 3, but would perhaps be more important to note that it was actually 100% dissonant.
+Though there are certainly plenty of other ways that it might be useful to look at this data, one question that may well come to mind is whether looking at just averages is actually useful. There are 964 tunes in this dataset, but even with a reasonably large "n", it won't give a clear picture of cases where, say, SD 6 only occurred 3 times but was dissonant 100% of the time. This would enter the "average" as a count of 3, but would perhaps be more important to note that it was actually 100% dissonant.
 
 The two graphs below again separate out each section but examine the proportion of dissonance of each scale degree relative to its presence in the individual tune, represented as a heatmap. Dark colors represent a low proportion of dissonance and light colors represent a high proportion of dissonance, compared to the total times the SD occurred in the tune itself. The tune names are suppressed on the x-axis for the sake of legibility.
 
-The two graphs do show variation in the patterns within each "row" (each horizontal band representing one SD), but in general these graphs do seem to tell a similar story to the previous: SD 1 and SD5 are much less dissonant than SD 2, 4, 6, or 7, and SD 3 stands in between those two groups.
+The two graphs show variation in the patterns within each "row" (each horizontal band representing one SD), but in general these graphs do seem to tell a similar story to the previous: SD 1 and SD 5 are much less dissonant than SD 2, 4, 6, or 7, and SD 3 stands somewhere in between those two groups.
 :::
 ## Row {height=60%}
 
@@ -456,7 +469,8 @@ The two graphs do show variation in the patterns within each "row" (each horizon
 
 ```{r}
 
-# join the SD and the diss SD, calculate proportions, fill props with zeroes if there were no SD in the first place
+
+# join the SD and the diss SD, calculate proportions (diss/all), fill props with zeroes if there were no SD in the first place
 A_joined <- SD_A_join |> 
   inner_join(solf_dissA_join, by = "tune_name", suffix = c("_reg","_diss")) |> 
   mutate(
@@ -490,6 +504,9 @@ B_joined <- SD_B_join |>
     ) |> 
   select (tune_name,SD1_prop,SD2_prop,SD3_prop,SD4_prop,SD5_prop,SD6_prop,SD7_prop)
 
+# Here is where the issue with the "Other" encoding becomes a problem, as a few isolated tunes had "proportions" of 2 because something was encoded as "Other" in the dissonance numbers and some form of SD in the "all" numbers. Since this is an error that would require going back to the original encoding, not the dataset itself, I am manually "fixing" it by setting the max proportion to 1 for the purposes of this project. I plan to go back to my data and see where the inconsistency lies for the "real" project though!
+
+# pivot longer, summarize the proportions of dissonance per scale degree
 A_prop_summary <- pivot_longer(
   A_joined,
   cols=c(
@@ -509,7 +526,7 @@ B_prop_summary <- pivot_longer(
   ) |> mutate(prop_diss = ifelse(prop_diss>1,1,prop_diss))
  
 
-
+# heatmap plot to show the proportion of scale degree (varying between 0 and 1), per scale degree, per tune
 
 ggplot(A_prop_summary, aes(tune_name, Diss_proportions, fill= prop_diss)) + 
   geom_tile() +
@@ -528,6 +545,7 @@ ggplot(A_prop_summary, aes(tune_name, Diss_proportions, fill= prop_diss)) +
 ::: {.card title="Proportions of dissonance, B sections"}
 
 ```{r}
+#second heatmap plot, for the B section
 
 ggplot(B_prop_summary, aes(tune_name, Diss_proportions, fill= prop_diss)) + 
   geom_tile() +
@@ -544,7 +562,7 @@ ggplot(B_prop_summary, aes(tune_name, Diss_proportions, fill= prop_diss)) +
 
 ::: {.card title="Proportions of pairwise dissonance, A-B sections"}
 ```{r}
-# join the two together
+# join the two together, calculate the pairwise difference of the two proportions
 all_joined <- A_joined |>
   left_join(B_joined, by = join_by(tune_name),suffix = (c("A","B"))) |> 
   mutate(
@@ -564,7 +582,7 @@ all_joined <- A_joined |>
 
 
 
-# summarizes the average differences per solfege for all (not dissonant)
+# summarizes the average differences of each dissonant proportion, per SD
 SD_diff_prop <- pivot_longer(
   all_joined,
   cols=c(
@@ -579,7 +597,7 @@ SD_diff_prop <- pivot_longer(
     avg_diss_prop = mean(count)
   )
 
-
+# pairwise difference of dissonant proportions of each SD 
 ggplot(SD_diff_prop, aes(x = SD_diff_prop, y = avg_diss_prop,fill = avg_diss_prop< 0)) +
   geom_col() + 
   xlab("Proportion of dissonance (diss SD/total SD)") +
@@ -608,6 +626,7 @@ Finally, we could examine a difference of these proportions, similar to the prev
 ## Row {height=100%}
 
 ::: {.card title="Summary"}
+The data visualization shown in this project has demonstrated differences in dissonance usage in A vs. B sections of contra dance tunes. In this particular dataset, which scale degrees were used as dissonance was the primary area of focus. It was found that although the overall key profile (amount of each scale degree) was very similar in A and B sections, both total average and pairwise comparisons of tunes suggested that individual scales degree behaved differently between different sections of the tunes. In general, scale degrees 1, 3, and 5 were found to behave slightly differently in A sections vs. B sections, and this was found to be true both with averaging the pairwise differences and when accounting for the proportion of dissonant usage of a scale degree vs. the total usage of that same scale degree within a tune (measured in sixteenth notes). In all cases, these differences were relatively small in magnitude, so it remains to be seen whether these differences are statistically significant.
 :::
 
 ::: {.card title="Further Resources"}
